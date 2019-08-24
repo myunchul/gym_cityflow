@@ -42,16 +42,16 @@ class CityFlow_1x1_LowTraffic(gym.Env):
     """
 
     metadata = {'render.modes':['human']}
-    def __init__(self, steps_per_episode):
+    def __init__(self):
 
         # hardcoded settings from "config.json" file
-        self.cityflow = cityflow.Engine("envs/1x1_config/config.json", thread_num=1)
+        self.cityflow = cityflow.Engine("1x1_config/config.json", thread_num=1)
         self.intersection_id = "intersection_1_1"
         self.num_lane = 8
         self.sec_per_step = 1.0
         self.action_space = spaces.Discrete(9)
 
-        self.steps_per_episode = steps_per_episode
+        self.steps_per_episode = 1500
         self.current_step = 0
         self.is_done = False
 
@@ -84,7 +84,8 @@ class CityFlow_1x1_LowTraffic(gym.Env):
         self.is_done = False
         return self._get_state()
 
-    #def render(self, mode='human'):
+    def render(self, mode='human'):
+        print("Current time: " + self.cityflow.get_current_time())
 
     #def close(self):
     #    del self.cityflow

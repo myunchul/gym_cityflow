@@ -1,2 +1,1 @@
-from gym_cityflow.envs.cityflow import cityflow
-# Todo: give correct name instead of "FooEnv"
+from gym_cityflow.envs.cityflow_1x1 import CityFlow_1x1_LowTraffic
