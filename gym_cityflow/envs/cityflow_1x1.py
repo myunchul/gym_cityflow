@@ -11,7 +11,8 @@ class CityFlow_1x1_LowTraffic(gym.Env):
         8 roads, 1 intersection (plus 4 virtual intersections).
 
     State:
-        The total number of vehicles -- whether waiting or not -- on each lane.
+        Type: array[16]
+        The number of vehicless and waiting vehicles on each lane.
 
     Actions:
         Type: Discrete(9)
@@ -29,8 +30,7 @@ class CityFlow_1x1_LowTraffic(gym.Env):
               {"time": 30,"availableRoadLinks": [0,1]},
               {"time": 30,"availableRoadLinks": [4,5]},
               {"time": 30,"availableRoadLinks": [2,3]},
-              {"time": 30,"availableRoadLinks": [6,7]}
-            ]
+              {"time": 30,"availableRoadLinks": [6,7]}]
 
     Reward:
         The total amount of time -- in seconds -- that all the vehicles in the intersection
@@ -45,7 +45,7 @@ class CityFlow_1x1_LowTraffic(gym.Env):
     def __init__(self):
 
         # hardcoded settings from "config.json" file
-        self.cityflow = cityflow.Engine("1x1_config/config.json", thread_num=1)
+        self.cityflow = cityflow.Engine("/home/isaac/gym_cityflow/gym_cityflow/envs/1x1_config/config.json", thread_num=1)
         self.intersection_id = "intersection_1_1"
         self.num_lane = 8
         self.sec_per_step = 1.0
@@ -57,8 +57,6 @@ class CityFlow_1x1_LowTraffic(gym.Env):
 
     def step(self, action):
         assert self.action_space.contains(action), "%r (%s) invalid"%(action, type(action))
-
-
         self.cityflow.set_tl_phase(self.intersection_id, action)
         self.cityflow.next_step()
 
@@ -87,16 +85,14 @@ class CityFlow_1x1_LowTraffic(gym.Env):
     def render(self, mode='human'):
         print("Current time: " + self.cityflow.get_current_time())
 
-    #def close(self):
-    #    del self.cityflow
-
     def _get_state(self):
         lane_vehicles_dict = self.cityflow.get_lane_vehicle_count()
         lane_waiting_vehicles_dict = self.cityflow.get_lane_waiting_vehicle_count()
-        state = np.zeroes(self.num_lane, 2)
+        road_ids = list(lane_vehicles_dict.keys())
+        state = np.zeros(self.num_lane * 2, dtype=np.float32)
         for i in range(self.num_lane):
-            state[i][0] = lane_vehicles_dict[i]
-            state[i][1] = lane_waiting_vehicles_dict[i]
+            state[i*2] = lane_vehicles_dict[road_ids[i]]
+            state[i*2 + 1] = lane_waiting_vehicles_dict[road_ids[i]]
         return state
 
     def _get_reward(self):
