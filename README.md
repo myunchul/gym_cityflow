@@ -65,6 +65,7 @@ class MyEnv(gym.Env):
         """
 
     def render(self, mode='human'):
+        print("hello world")
 
     def close(self):
         """
