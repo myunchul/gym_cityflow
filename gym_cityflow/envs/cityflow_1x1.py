@@ -54,6 +54,14 @@ class CityFlow_1x1_LowTraffic(gym.Env):
         self.steps_per_episode = 1500
         self.current_step = 0
         self.is_done = False
+        self.road_ids = ["road_0_1_0",
+                        "road_1_0_1",
+                        "road_2_1_2",
+                        "road_1_2_3",
+                        "road_1_1_0",
+                        "road_1_1_1",
+                        "road_1_1_2",
+                        "road_1_1_3"]
 
     def step(self, action):
         assert self.action_space.contains(action), "%r (%s) invalid"%(action, type(action))
@@ -99,6 +107,7 @@ class CityFlow_1x1_LowTraffic(gym.Env):
         lane_waiting_vehicles_dict = self.cityflow.get_lane_waiting_vehicle_count()
         reward = 0.0
 
-        for _ in lane_waiting_vehicles_dict:
-            reward -= self.sec_per_step
+        for (road_id, num_vehicles) in lane_waiting_vehicles_dict.items():
+            if road_id in self.road_ids:
+                reward -= self.sec_per_step * num_vehicles
         return reward
