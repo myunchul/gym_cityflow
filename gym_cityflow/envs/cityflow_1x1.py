@@ -43,7 +43,6 @@ class CityFlow_1x1_LowTraffic(gym.Env):
 
     metadata = {'render.modes':['human']}
     def __init__(self):
-
         # hardcoded settings from "config.json" file
         self.cityflow = cityflow.Engine("/home/isaac/gym_cityflow/gym_cityflow/envs/1x1_config/config.json", thread_num=1)
         self.intersection_id = "intersection_1_1"
@@ -54,14 +53,15 @@ class CityFlow_1x1_LowTraffic(gym.Env):
         self.steps_per_episode = 1500
         self.current_step = 0
         self.is_done = False
-        self.road_ids = ["road_0_1_0",
-                        "road_1_0_1",
-                        "road_2_1_2",
-                        "road_1_2_3",
-                        "road_1_1_0",
-                        "road_1_1_1",
-                        "road_1_1_2",
-                        "road_1_1_3"]
+        self.road_ids = ["road_0_1_0_0",
+                        "road_1_0_1_0",
+                        "road_2_1_2_0",
+                        "road_1_2_3_0",
+                        "road_1_1_0_0",
+                        "road_1_1_1_0",
+                        "road_1_1_2_0",
+                        "road_1_1_3_0"]
+
 
     def step(self, action):
         assert self.action_space.contains(action), "%r (%s) invalid"%(action, type(action))
@@ -88,6 +88,8 @@ class CityFlow_1x1_LowTraffic(gym.Env):
     def reset(self):
         self.cityflow.reset()
         self.is_done = False
+        self.current_step = 0
+
         return self._get_state()
 
     def render(self, mode='human'):
@@ -96,11 +98,10 @@ class CityFlow_1x1_LowTraffic(gym.Env):
     def _get_state(self):
         lane_vehicles_dict = self.cityflow.get_lane_vehicle_count()
         lane_waiting_vehicles_dict = self.cityflow.get_lane_waiting_vehicle_count()
-        road_ids = list(lane_vehicles_dict.keys())
         state = np.zeros(self.num_lane * 2, dtype=np.float32)
-        for i in range(self.num_lane):
-            state[i*2] = lane_vehicles_dict[road_ids[i]]
-            state[i*2 + 1] = lane_waiting_vehicles_dict[road_ids[i]]
+        for i in range(len(self.road_ids)):
+            state[i*2] = lane_vehicles_dict[self.road_ids[i]]
+            state[i*2 + 1] = lane_waiting_vehicles_dict[self.road_ids[i]]
         return state
 
     def _get_reward(self):
@@ -111,3 +112,9 @@ class CityFlow_1x1_LowTraffic(gym.Env):
             if road_id in self.road_ids:
                 reward -= self.sec_per_step * num_vehicles
         return reward
+
+    def set_replay_path(self, path):
+        self.cityflow.set_replay_file(path)
+
+    def seed(self, seed):
+        self.cityflow.set_random_seed(seed)

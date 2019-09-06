@@ -1,6 +1,6 @@
 {
 	"interval": 1.0,
-	"seed": 0,
+	"seed": 1,
 	"dir": "/home/isaac/gym_cityflow/gym_cityflow/envs/1x1_config/",
 	"roadnetFile": "roadnet.json",
 	"flowFile": "flow.json",
