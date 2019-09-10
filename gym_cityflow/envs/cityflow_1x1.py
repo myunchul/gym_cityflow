@@ -1,8 +1,9 @@
 import gym
-from gym import error, spaces, utils, logger
+from gym import error, spaces, utils, logger, make
 from gym.utils import seeding
 import cityflow
 import numpy as np
+import os
 
 class CityFlow_1x1_LowTraffic(gym.Env):
     """
@@ -36,32 +37,120 @@ class CityFlow_1x1_LowTraffic(gym.Env):
         The total amount of time -- in seconds -- that all the vehicles in the intersection
         waitied for.
 
-        Todo: as a way to enssure fairness -- i.e. not a single lane gets green lights for too long --
+        Todo: as a way to ensure fairness -- i.e. not a single lane gets green lights for too long --
         instead of simply summing up the waiting time, we could weigh the waiting time of each car by how
         much it had waited so far.
     """
 
     metadata = {'render.modes':['human']}
     def __init__(self):
+        super(CityFlow_1x1_LowTraffic, self).__init__()
         # hardcoded settings from "config.json" file
-        self.cityflow = cityflow.Engine("/home/isaac/gym_cityflow/gym_cityflow/envs/1x1_config/config.json", thread_num=1)
+        self.config_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "1x1_config")
+        self.cityflow = cityflow.Engine(os.path.join(self.config_dir, "config.json"), thread_num=1)
         self.intersection_id = "intersection_1_1"
-        self.num_lane = 8
+
         self.sec_per_step = 1.0
         self.action_space = spaces.Discrete(9)
 
         self.steps_per_episode = 1500
         self.current_step = 0
         self.is_done = False
-        self.road_ids = ["road_0_1_0_0",
-                        "road_1_0_1_0",
-                        "road_2_1_2_0",
-                        "road_1_2_3_0",
-                        "road_1_1_0_0",
-                        "road_1_1_1_0",
-                        "road_1_1_2_0",
-                        "road_1_1_3_0"]
+        self.reward_range = (-float('inf'), float('inf'))
+        self.start_lane_ids = \
+            ["road_0_1_0_0",
+             "road_0_1_0_1",
+             "road_1_0_1_0",
+             "road_1_0_1_1",
+             "road_2_1_2_0",
+             "road_2_1_2_1",
+             "road_1_2_3_0",
+             "road_1_2_3_1"]
 
+        self.all_lane_ids = \
+            ["road_0_1_0_0",
+             "road_0_1_0_1",
+             "road_1_0_1_0",
+             "road_1_0_1_1",
+             "road_2_1_2_0",
+             "road_2_1_2_1",
+             "road_1_2_3_0",
+             "road_1_2_3_1",
+             "road_1_1_0_0",
+             "road_1_1_0_1",
+             "road_1_1_1_0",
+             "road_1_1_1_1",
+             "road_1_1_2_0",
+             "road_1_1_2_1",
+             "road_1_1_3_0",
+             "road_1_1_3_1"]
+
+        """
+        road id:
+        ["road_0_1_0",
+         "road_1_0_1",
+         "road_2_1_2",
+         "road_1_2_3",
+         "road_1_1_0",
+         "road_1_1_1",
+         "road_1_1_2",
+         "road_1_1_3"]
+         
+        start road id:
+        ["road_0_1_0",
+        "road_1_0_1",
+        "road_2_1_2",
+        "road_1_2_3"]
+        
+        lane id:
+        ["road_0_1_0_0",
+         "road_0_1_0_1",
+         "road_1_0_1_0",
+         "road_1_0_1_1",
+         "road_2_1_2_0",
+         "road_2_1_2_1",
+         "road_1_2_3_0",
+         "road_1_2_3_1",
+         "road_1_1_0_0",
+         "road_1_1_0_1",
+         "road_1_1_1_0",
+         "road_1_1_1_1",
+         "road_1_1_2_0",
+         "road_1_1_2_1",
+         "road_1_1_3_0",
+         "road_1_1_3_1"]
+         
+         start lane id:
+         ["road_0_1_0_0",
+         "road_0_1_0_1",
+         "road_1_0_1_0",
+         "road_1_0_1_1",
+         "road_2_1_2_0",
+         "road_2_1_2_1",
+         "road_1_2_3_0",
+         "road_1_2_3_1"]
+        """
+
+        self.mode = "start_waiting"
+        assert self.mode == "all_all" or self.mode == "start_waiting", "mode must be one of 'all_all' or 'start_waiting'"
+        """
+        `mode` variable changes both reward and state.
+        
+        "all_all":
+            - state: waiting & running vehicle count from all lanes (incoming & outgoing)
+            - reward: waiting vehicle count from all lanes
+            
+        "start_waiting" - 
+            - state: only waiting vehicle count from only start lanes (only incoming)
+            - reward: waiting vehicle count from start lanes
+        """
+        """
+        if self.mode == "all_all":
+            self.state_space = len(self.all_lane_ids) * 2
+
+        if self.mode == "start_waiting":
+            self.state_space = len(self.start_lane_ids)
+        """
 
     def step(self, action):
         assert self.action_space.contains(action), "%r (%s) invalid"%(action, type(action))
@@ -98,23 +187,47 @@ class CityFlow_1x1_LowTraffic(gym.Env):
     def _get_state(self):
         lane_vehicles_dict = self.cityflow.get_lane_vehicle_count()
         lane_waiting_vehicles_dict = self.cityflow.get_lane_waiting_vehicle_count()
-        state = np.zeros(self.num_lane * 2, dtype=np.float32)
-        for i in range(len(self.road_ids)):
-            state[i*2] = lane_vehicles_dict[self.road_ids[i]]
-            state[i*2 + 1] = lane_waiting_vehicles_dict[self.road_ids[i]]
+
+        state = None
+
+        if self.mode=="all_all":
+            state = np.zeros(len(self.all_lane_ids) * 2, dtype=np.float32)
+            for i in range(len(self.all_lane_ids)):
+                state[i*2] = lane_vehicles_dict[self.all_lane_ids[i]]
+                state[i*2 + 1] = lane_waiting_vehicles_dict[self.all_lane_ids[i]]
+
+        if self.mode=="start_waiting":
+            state = np.zeroes(len(self.start_lane_ids, dtype=np.float32))
+            for i in range(len(self.start_lane_ids)):
+                state[i] = lane_waiting_vehicles_dict[self.start_lane_ids[i]]
+
         return state
 
     def _get_reward(self):
         lane_waiting_vehicles_dict = self.cityflow.get_lane_waiting_vehicle_count()
         reward = 0.0
 
-        for (road_id, num_vehicles) in lane_waiting_vehicles_dict.items():
-            if road_id in self.road_ids:
-                reward -= self.sec_per_step * num_vehicles
+
+        if self.mode == "all_all":
+            for (road_id, num_vehicles) in lane_waiting_vehicles_dict.items():
+                if road_id in self.all_lane_ids:
+                    reward -= self.sec_per_step * num_vehicles
+
+        if self.mode == "start_waiting":
+            for (road_id, num_vehicles) in lane_waiting_vehicles_dict.items():
+                if road_id in self.start_lane_ids:
+                    reward -= self.sec_per_step * num_vehicles
+
         return reward
 
     def set_replay_path(self, path):
         self.cityflow.set_replay_file(path)
 
-    def seed(self, seed):
+    def seed(self, seed=None):
         self.cityflow.set_random_seed(seed)
+
+    def get_path_to_config(self):
+        return self.config_dir
+
+    def set_save_replay(self, save_replay):
+        self.cityflow.set_save_replay(save_replay)

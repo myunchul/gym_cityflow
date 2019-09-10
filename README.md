@@ -4,9 +4,8 @@ The `gym_cityflow` adds a custom environment from CityFlow following this [tutor
  `pip install -e .`
  
 ```python
-import gym
 import gym_cityflow
-env = gym.make('cityflow')
+env = gym_cityflow.make('CityFlow-1x1-LowTraffic-v0')
 ```
 
 CityFlow `config.json`, `flow.json`, and `roadnet.json` are from [CityFlow/examples](https://github.com/cityflow-project/CityFlow/tree/master/examples)
