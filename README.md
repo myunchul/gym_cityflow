@@ -1,5 +1,25 @@
 
-The `gym_cityflow` adds a custom environment from CityFlow following this [tutorial](https://medium.com/@apoddar573/making-your-own-custom-environment-in-gym-c3b65ff8cdaa).
+## Basics
+
+The `gym_cityflow` adds a custom environment from CityFlow following this [tutorial](https://stable-baselines.readthedocs.io/en/master/guide/custom_env.html).
+ 
+```
+gym_cityflow/
+  README.md
+  setup.py
+  test.py
+  gym_cityflow/
+    __init__.py
+    envs/
+      __init__.py
+      fcityflow_1x1.py
+      1x1_config/
+        config.json
+        flow.json
+        roadnet.json
+```
+
+## Installation 
  
  `pip install -e .`
  

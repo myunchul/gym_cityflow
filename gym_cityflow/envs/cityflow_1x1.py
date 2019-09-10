@@ -1,5 +1,5 @@
 import gym
-from gym import error, spaces, utils, logger, make
+from gym import error, spaces, utils, logger
 from gym.utils import seeding
 import cityflow
 import numpy as np
@@ -44,7 +44,7 @@ class CityFlow_1x1_LowTraffic(gym.Env):
 
     metadata = {'render.modes':['human']}
     def __init__(self):
-        super(CityFlow_1x1_LowTraffic, self).__init__()
+        #super(CityFlow_1x1_LowTraffic, self).__init__()
         # hardcoded settings from "config.json" file
         self.config_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "1x1_config")
         self.cityflow = cityflow.Engine(os.path.join(self.config_dir, "config.json"), thread_num=1)
@@ -197,7 +197,7 @@ class CityFlow_1x1_LowTraffic(gym.Env):
                 state[i*2 + 1] = lane_waiting_vehicles_dict[self.all_lane_ids[i]]
 
         if self.mode=="start_waiting":
-            state = np.zeroes(len(self.start_lane_ids, dtype=np.float32))
+            state = np.zeros(len(self.start_lane_ids, dtype=np.float32))
             for i in range(len(self.start_lane_ids)):
                 state[i] = lane_waiting_vehicles_dict[self.start_lane_ids[i]]
 

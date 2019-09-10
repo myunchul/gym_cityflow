@@ -1,4 +1,4 @@
-from gym.envs.registration import register, make
+from gym.envs.registration import register
 
 # source: https://github.com/openai/gym/blob/master/gym/envs/__init__.py
 
