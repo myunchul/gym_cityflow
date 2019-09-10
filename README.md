@@ -1,7 +1,7 @@
 
 ## Basics
 
-The `gym_cityflow` adds a custom environment from CityFlow following this [tutorial](https://stable-baselines.readthedocs.io/en/master/guide/custom_env.html).
+The `gym_cityflow` adds a custom environment from CityFlow following this [tutorial](https://github.com/openai/gym/blob/master/docs/creating-environments.md).
  
 ```
 gym_cityflow/
