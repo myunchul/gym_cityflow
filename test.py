@@ -1,8 +1,8 @@
-import gym_cityflow
+import gym
 import numpy as np
 
 if __name__ == "__main__":
-    env = gym_cityflow.make('CityFlow-1x1-LowTraffic-v0')
+    env = gym.make('CityFlow-1x1-LowTraffic-v0')
     env.set_save_replay(False)
 
     is_done = False
