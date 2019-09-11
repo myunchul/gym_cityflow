@@ -24,8 +24,10 @@ gym_cityflow/
  `pip install -e .`
  
 ```python
+import gym
 import gym_cityflow
-env = gym_cityflow.make('CityFlow-1x1-LowTraffic-v0')
+
+env = gym.make('gym_cityflow:CityFlow-1x1-LowTraffic-v0')
 ```
 
 CityFlow `config.json`, `flow.json`, and `roadnet.json` are from [CityFlow/examples](https://github.com/cityflow-project/CityFlow/tree/master/examples)
