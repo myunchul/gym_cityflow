@@ -1,1 +1,1 @@
-from gym_cityflow.envs.cityflow_1x1 import CityFlow_1x1_LowTraffic
+from gym_cityflow.envs.CityFlow_1x1_LowTraffic import CityFlow_1x1_LowTraffic

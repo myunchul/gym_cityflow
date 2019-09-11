@@ -1,4 +1,5 @@
 import gym
+import gym_cityflow
 import numpy as np
 
 if __name__ == "__main__":
