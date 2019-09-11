@@ -197,7 +197,7 @@ class CityFlow_1x1_LowTraffic(gym.Env):
                 state[i*2 + 1] = lane_waiting_vehicles_dict[self.all_lane_ids[i]]
 
         if self.mode=="start_waiting":
-            state = np.zeros(len(self.start_lane_ids, dtype=np.float32))
+            state = np.zeros(len(self.start_lane_ids), dtype=np.float32)
             for i in range(len(self.start_lane_ids)):
                 state[i] = lane_waiting_vehicles_dict[self.start_lane_ids[i]]
 
