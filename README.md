@@ -1,7 +1,7 @@
 
 ## Basics
 
-The `gym_cityflow` adds a custom environment from CityFlow following this [tutorial](https://github.com/openai/gym/blob/master/docs/creating-environments.md).
+`gym_cityflow` adds a custom environment from CityFlow following this [tutorial](https://github.com/openai/gym/blob/master/docs/creating-environments.md).
  
 ```
 gym_cityflow/
